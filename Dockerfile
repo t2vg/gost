@@ -1,6 +1,6 @@
-FROM --platform=$BUILDPLATFORM tonistiigi/xx:1.6.1 AS xx
+FROM --platform=$BUILDPLATFORM tonistiigi/xx:1.10.0 AS xx
 
-FROM --platform=$BUILDPLATFORM golang:1.27-alpine3.23 AS builder
+FROM --platform=$BUILDPLATFORM golang:1.27.4-alpine3.24 AS builder
 
 # UPX compression disabled by default (see #863): upx --best adds ~3s startup
 # time on low-spec systems (linux/arm). Builds can opt in by uncommenting the
@@ -27,10 +27,11 @@ RUN cd cmd/gost && \
     xx-go build -ldflags "-s -w -X main.version=${VERSION}" && \
     xx-verify gost
 
-FROM alpine:3.23
+FROM alpine:3.24.4 AS runtime
 
 # add iptables/nftables for tun/tap
-RUN apk add --no-cache iptables nftables
+RUN apk upgrade --no-cache && \
+    apk add --no-cache iptables nftables
 
 WORKDIR /bin/
 
